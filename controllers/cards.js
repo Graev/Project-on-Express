@@ -15,7 +15,11 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  Card.findByIdAndDelete(req.params.cardId, (err) => {
+    if (err.message.includes('Cast to ObjectId failed')) {
+      res.json({ message: "Карточка не найдена"});
+    }
+  })
     .then((card) => res.send({ data: card }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
