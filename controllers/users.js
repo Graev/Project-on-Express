@@ -8,8 +8,8 @@ module.exports.findAllUsers = (req, res) => {
 
 module.exports.findUserById = (req, res) => {
   User.findById(req.params.id, (err) => {
-    if (err.message.includes('Cast to ObjectId failed')) {
-      res.json({ message: "Пользователь не найден"});
+    if (err && err.message.includes('Cast to ObjectId failed')) {
+      res.json({ message: 'Пользователь не найден' });
     }
   })
     .then((user) => res.send({ data: user }))

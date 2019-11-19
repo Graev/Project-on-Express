@@ -11,13 +11,13 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка', err: err }));
+    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId, (err) => {
-    if (err.message.includes('Cast to ObjectId failed')) {
-      res.json({ message: "Карточка не найдена"});
+    if (err && err.message.includes('Cast to ObjectId failed')) {
+      res.json({ message: 'Карточка не найдена' });
     }
   })
     .then((card) => res.send({ data: card }))
