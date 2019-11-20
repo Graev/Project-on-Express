@@ -1,8 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const routerUsers = require('./routes/users');
-const routerCards = require('./routes/cards');
+const routerIndex = require('./routes/index');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -23,10 +22,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-app.use('/users', routerUsers);
-app.use('/cards', routerCards);
-app.get('/*', (req, res) => {
-  res.status(404).send({ "message": "Запрашиваемый ресурс не найден" });
+app.use('/', routerIndex);
+app.all('/*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 
 

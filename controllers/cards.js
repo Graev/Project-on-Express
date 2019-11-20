@@ -10,16 +10,25 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
+    .then((card) => res.status(201).send({ data: card }))
+    .catch((err) => {
+      switch (err.message) {
+        case 'user validation failed: about: Path `name` is required.':
+          res.status(404).send({ message: 'Не введено поле name' });
+          break;
+        case 'user validation failed: name: Path `link` is required.':
+          res.status(404).send({ message: 'Не введено поле link' });
+          break;
+        default:
+          res.status(500).send({ message: 'Произошла ошибка' });
+      }
+      // res.status(500).send({ message: 'Произошла ошибка', err });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId, (err) => {
-    if (err && err.message.includes('Cast to ObjectId failed')) {
-      res.json({ message: 'Карточка не найдена' });
-    }
-  })
+  Card.findByIdAndDelete(req.params.cardId)
+    .orFail(() => res.send({ message: 'Карточка не найдена' }))
     .then((card) => res.send({ data: card }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('mongoose-validator');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -9,9 +10,11 @@ const cardSchema = new mongoose.Schema({
   },
   link: {
     type: String,
-    validate: {
-      validator: (v) => /(?:(?:http:\/\/)|(?:https:\/\/))(?:[w]{3}\.)?(?:(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(?:(?:[a-zA-Z\-]+\.)?[a-zA-Z\-]+\.[a-zA-Z]+))(?::\d{2,5})?(?:[a-zA-Z\-\/0-9]#?)*.*/.test(v),
-    },
+    required: true,
+    validate: validator({
+      validator: 'isURL',
+      message: 'Введена не ссылка',
+    }),
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
