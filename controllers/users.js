@@ -8,9 +8,13 @@ module.exports.findAllUsers = (req, res) => {
 
 module.exports.findUserById = (req, res) => {
   User.findById(req.params.id)
-    .orFail(() => res.send({ message: 'Пользователь не найден' }))
+    .orFail(() => res.status(404).send({ message: 'Пользователь не найден' }))
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      const statusCode = (err.message.includes('Cast to ObjectId failed')) ? 404 : 500;
+      const message = statusCode === 404 ? 'Неверно указан ID пользователя' : 'Произошла ошибка';
+      res.status(statusCode).send({ message });
+    });
 };
 
 module.exports.createUser = (req, res) => {

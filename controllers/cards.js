@@ -28,9 +28,13 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
-    .orFail(() => res.send({ message: 'Карточка не найдена' }))
+    .orFail(() => res.status(404).send({ message: 'Карточка не найдена' }))
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      const statusCode = (err.message.includes('Cast to ObjectId failed')) ? 404 : 500;
+      const message = statusCode === 404 ? 'Неверно указан ID карточки' : 'Произошла ошибка';
+      res.status(statusCode).send({ message });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
