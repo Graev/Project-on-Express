@@ -7,15 +7,15 @@ const helmet = require('helmet');
 const routerIndex = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { PORT = 3000, SERVER_URL } = require('./config');
 
 const app = express();
-const { PORT = 3000 } = process.env;
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect(SERVER_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -23,7 +23,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.post('/signin', login);
-app.post('/singup', createUser);
+app.post('/signup', createUser);
 
 app.use(auth);
 
