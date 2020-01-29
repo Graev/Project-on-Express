@@ -5,7 +5,7 @@ const { JWT_TOKEN } = require('../config');
 module.exports = (req, res, next) => {
   let playload;
   try {
-    playload = jwt.verify(req.cookie.jwt, JWT_TOKEN);
+    playload = jwt.verify(req.cookies.jwt, JWT_TOKEN);
   } catch (err) {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }

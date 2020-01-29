@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const routerIndex = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { PORT = 3000, SERVER_URL } = require('./config');
+const { PORT, DATABASE_URL } = require('./config');
 
 const app = express();
 app.use(helmet());
@@ -15,15 +15,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-mongoose.connect(SERVER_URL, {
+mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
 
-app.post('/signin', login);
 app.post('/signup', createUser);
+app.post('/signin', login);
 
 app.use(auth);
 

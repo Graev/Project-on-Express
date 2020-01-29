@@ -26,17 +26,19 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then(card => {
       if (!card) {
         return res.status(404).send({ message: 'Карточка не найдена' });
       }
-      if (!(card.owner._id === req.user._id)) {
+      if (!card.owner._id.equals(req.user._id)) {
         return res
           .status(403)
           .send({ message: 'Не Вы создавали, не Вам и удалять' });
       }
-      return res.send({ data: card });
+      Card.findByIdAndDelete(req.params.cardId).then(cardDel => {
+        return res.send({ data: cardDel, message: 'Успешное удаление' });
+      });
     })
     .catch(() => {
       res.status(500).send({ message: 'Произошла ошибка' });
@@ -49,7 +51,12 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then(card => res.send({ data: card.likes }))
+    .then(card => {
+      if (card === null) {
+        return res.status(404).send({ message: 'Карточка не найдена' });
+      }
+      res.send({ data: card.likes });
+    })
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
@@ -59,6 +66,11 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .then(card => res.send({ data: card.likes }))
+    .then(card => {
+      if (card === null) {
+        return res.status(404).send({ message: 'Карточка не найдена' });
+      }
+      res.send({ data: card.likes });
+    })
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
