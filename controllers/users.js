@@ -1,54 +1,48 @@
+/* eslint-disable no-undef */
 /* eslint-disable consistent-return */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 const { JWT_TOKEN } = require('../config');
+const {
+  NotFoundError,
+  BadRequest,
+  AuthError,
+} = require('../errorsCatch/errorsCatch');
 
 module.exports.findAllUsers = (req, res) => {
   User.find({})
     .then(user => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 module.exports.findUserById = (req, res) => {
   User.findById(req.params.id)
     .then(user => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send({ data: user });
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
-    });
+    .catch(next);
 };
 
 module.exports.createUser = (req, res) => {
   const { email, name, password, about, avatar } = req.body;
   if (email === undefined) {
-    return res.status(400).send({
-      message: 'Не введено поле email',
-    });
+    throw new BadRequest('Не введено поле email');
   }
   if (name === undefined) {
-    return res.status(400).send({
-      message: 'Не введено поле name',
-    });
+    throw new BadRequest('Не введено поле name');
   }
   if (password === undefined) {
-    return res.status(400).send({
-      message: 'Не введено поле password',
-    });
+    throw new BadRequest('Не введено поле password');
   }
   if (about === undefined) {
-    return res.status(400).send({
-      message: 'Не введено поле about',
-    });
+    throw new BadRequest('Не введено поле about');
   }
   if (avatar === undefined) {
-    return res.status(400).send({
-      message: 'Не введено поле avatar',
-    });
+    throw new BadRequest('Не введено поле avatar');
   }
 
   bcrypt.hash(password, 10).then(hash => {
@@ -63,9 +57,7 @@ module.exports.createUser = (req, res) => {
         res.status(201).send({ message: 'Пользователь успешно создан' })
       )
       .catch(
-        () => {
-          res.status(500).send({ message: 'Произошла ошибка' });
-        }
+        next
         // res.status(500).send({ message: 'Произошла ошибка', err });
       );
   });
@@ -87,9 +79,10 @@ module.exports.login = (req, res) => {
         })
         .end();
     })
-    .catch(err => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(() => {
+      throw new AuthError('Ошибка аутентификации или авторизации');
+    })
+    .catch(next);
 };
 
 module.exports.updateUserData = (req, res) => {
@@ -101,7 +94,7 @@ module.exports.updateUserData = (req, res) => {
     { new: true, runValidators: true }
   )
     .then(user => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -113,5 +106,5 @@ module.exports.updateUserAvatar = (req, res) => {
     { new: true, runValidators: true }
   )
     .then(user => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };

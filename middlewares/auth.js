@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_TOKEN } = require('../config');
+const { AuthError } = require('../errorsCatch/errorsCatch');
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
@@ -7,7 +8,8 @@ module.exports = (req, res, next) => {
   try {
     playload = jwt.verify(req.cookies.jwt, JWT_TOKEN);
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    const error = new AuthError('Ошибка аутентификации или авторизации');
+    next(error);
   }
 
   req.user = playload;
