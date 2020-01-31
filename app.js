@@ -11,7 +11,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { PORT, DATABASE_URL } = require('./config');
 const { NotFoundError } = require('./errorsCatch/errorsCatch');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { requestLogger, errorsLogger } = require('./middlewares/logger');
 
 const app = express();
 app.use(helmet());
@@ -74,7 +74,7 @@ app.all('/*', (req, res) => {
   next(err);
 });
 
-app.use(errorLogger);
+app.use(errorsLogger);
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
