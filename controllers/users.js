@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable consistent-return */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -10,13 +9,13 @@ const {
   AuthError,
 } = require('../errorsCatch/errorsCatch');
 
-module.exports.findAllUsers = (req, res) => {
+module.exports.findAllUsers = (req, res, next) => {
   User.find({})
     .then(user => res.send({ data: user }))
     .catch(next);
 };
 
-module.exports.findUserById = (req, res) => {
+module.exports.findUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then(user => {
       if (!user) {
@@ -27,7 +26,7 @@ module.exports.findUserById = (req, res) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { email, name, password, about, avatar } = req.body;
   if (email === undefined) {
     throw new BadRequest('Не введено поле email');
@@ -45,25 +44,29 @@ module.exports.createUser = (req, res) => {
     throw new BadRequest('Не введено поле avatar');
   }
 
-  bcrypt.hash(password, 10).then(hash => {
-    User.create({
-      email,
-      password: hash,
-      name,
-      about,
-      avatar,
+  User.findOne({ email })
+    .then(user => {
+      if (!user) {
+        return bcrypt.hash(password, 10).then(hash => {
+          User.create({
+            email,
+            password: hash,
+            name,
+            about,
+            avatar,
+          })
+            .then(() =>
+              res.status(201).send({ message: 'Пользователь успешно создан' })
+            )
+            .catch(next);
+        });
+      }
+      throw new BadRequest('Пользователь с данным email уже существует');
     })
-      .then(() =>
-        res.status(201).send({ message: 'Пользователь успешно создан' })
-      )
-      .catch(
-        next
-        // res.status(500).send({ message: 'Произошла ошибка', err });
-      );
-  });
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -89,7 +92,7 @@ module.exports.login = (req, res) => {
     .catch(next);
 };
 
-module.exports.updateUserData = (req, res) => {
+module.exports.updateUserData = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -101,7 +104,7 @@ module.exports.updateUserData = (req, res) => {
     .catch(next);
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
