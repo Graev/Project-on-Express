@@ -5,4 +5,6 @@ const PORT = 3000;
 const DATABASE_URL =
   process.env.SERVER_URL || 'mongodb://localhost:27017/mestodb';
 
-module.exports = { JWT_TOKEN, PORT, DATABASE_URL };
+const { NODE_ENV } = process.env;
+
+module.exports = { JWT_TOKEN, PORT, DATABASE_URL, NODE_ENV };

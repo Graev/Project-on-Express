@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable consistent-return */
 const Card = require('../models/cards');
 const {
@@ -7,13 +6,13 @@ const {
   AccessError,
 } = require('../errorsCatch/errorsCatch');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then(card => res.send({ data: card }))
     .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   if (name === undefined) {
     throw new BadRequest('Не введено поле name');
@@ -29,7 +28,7 @@ module.exports.createCard = (req, res) => {
     );
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then(card => {
       if (!card) {
@@ -45,7 +44,7 @@ module.exports.deleteCard = (req, res) => {
     .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -60,7 +59,7 @@ module.exports.likeCard = (req, res) => {
     .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
